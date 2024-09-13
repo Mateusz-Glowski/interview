@@ -6,7 +6,7 @@ import {
   KlinesResponseProperties,
 } from './interfaces/klinesResponse';
 import { map, Observable } from 'rxjs';
-import { chunk } from 'lodash';
+import { chunk, sum } from 'lodash';
 
 @Injectable()
 export class BinanceClientService {
@@ -29,13 +29,34 @@ export class BinanceClientService {
     startTime: number,
     endTime: number,
     chunkSize: number = 10,
-  ): Observable<number[][]> {
+  ): Observable<any> {
+    return this.groupMarketData(symbol, startTime, endTime, chunkSize).pipe(
+      map((grouped) => {
+        return grouped.map((group) => ({
+          startTime: new Date(group[0][KlinesResponseProperties.klineOpenTime]),
+          endTime: new Date(
+            group.at(-1)[KlinesResponseProperties.klineCloseTime],
+          ),
+          average: sum(
+            group.map((x) => Number(x[KlinesResponseProperties.closePrice])),
+          ),
+        }));
+      }),
+    );
+  }
+
+  private groupMarketData(
+    symbol: string,
+    startTime: number,
+    endTime: number,
+    chunkSize: number = 10,
+  ): Observable<KlinesResponse> {
     return this.fetchMarketData(symbol, startTime, endTime).pipe(
       map((data) => {
-        const closePrice = data.map((x) =>
-          Number(x[KlinesResponseProperties.closePrice]),
-        );
-        return chunk(closePrice, chunkSize);
+        // const closePrice = data.map((x) =>
+        //   Number(x[KlinesResponseProperties.closePrice]),
+        // );
+        return chunk(data, chunkSize);
       }),
     );
   }

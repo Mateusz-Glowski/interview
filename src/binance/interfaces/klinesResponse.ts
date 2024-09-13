@@ -25,6 +25,6 @@ export type KlinesEntry = [
   string,
   string,
   string,
-]
+];
 
-export type KlinesResponse = KlinesEntry[]
+export type KlinesResponse = KlinesEntry[];
