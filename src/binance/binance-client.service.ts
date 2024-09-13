@@ -24,6 +24,9 @@ export class BinanceClientService {
       .pipe(map((res) => res.data));
   }
 
+  /**
+   * This endpoint calculates average close price in given time interval (10 minutes by default).
+   */
   aggregateMarketData(
     symbol: string,
     startTime: number,
@@ -37,10 +40,37 @@ export class BinanceClientService {
           endTime: new Date(
             group.at(-1)[KlinesResponseProperties.klineCloseTime],
           ),
-          average: sum(
-            group.map((x) => Number(x[KlinesResponseProperties.closePrice])),
-          ),
+          average:
+            sum(
+              group.map((x) => Number(x[KlinesResponseProperties.closePrice])),
+            ) / chunkSize,
         }));
+      }),
+    );
+  }
+
+  /**
+   * This endpoint builds upon `aggregateMarketData` method and adds additional field `upOrDown`
+   * which determines if the price went up/down since the last time period.
+   */
+  priceChange(
+    symbol: string,
+    startTime: number,
+    endTime: number,
+    chunkSize: number = 10,
+  ) {
+    return this.aggregateMarketData(symbol, startTime, endTime, chunkSize).pipe(
+      map((res) => {
+        for (let i = 0; i < res.length - 1; i++) {
+          const prevAgg = res[i];
+          const currAgg = res[i + 1];
+          if (i === 0) {
+            res[i].upOrDown = '-';
+          } else {
+            res[i].upOrDown = prevAgg.average > currAgg.average ? 'DOWN' : 'UP';
+          }
+        }
+        return res;
       }),
     );
   }
@@ -53,9 +83,6 @@ export class BinanceClientService {
   ): Observable<KlinesResponse> {
     return this.fetchMarketData(symbol, startTime, endTime).pipe(
       map((data) => {
-        // const closePrice = data.map((x) =>
-        //   Number(x[KlinesResponseProperties.closePrice]),
-        // );
         return chunk(data, chunkSize);
       }),
     );

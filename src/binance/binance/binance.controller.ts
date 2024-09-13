@@ -19,7 +19,28 @@ export class BinanceController {
     @Query('symbol') symbol: string,
     @Query('startTime') startTime: number,
     @Query('endTime') endTime: number,
+    @Query('interval') interval: number, // In minutes
   ) {
-    return this.binanceService.aggregateMarketData(symbol, startTime, endTime);
+    return this.binanceService.aggregateMarketData(
+      symbol,
+      startTime,
+      endTime,
+      interval,
+    );
+  }
+
+  @Get('priceChange')
+  priceChange(
+    @Query('symbol') symbol: string,
+    @Query('startTime') startTime: number,
+    @Query('endTime') endTime: number,
+    @Query('interval') interval: number, // In minutes
+  ) {
+    return this.binanceService.priceChange(
+      symbol,
+      startTime,
+      endTime,
+      interval,
+    );
   }
 }
