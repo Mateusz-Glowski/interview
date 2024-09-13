@@ -74,7 +74,7 @@ will return:
 ### /binance/priceChange
 
 This endpoint builds upon the previous one, so it works identically, except
-it adds one more field to the response which defines if the price wend up or down
+it adds one more field to the response which defines if the price went up or down
 since the previous interval.
 
 ```bash
