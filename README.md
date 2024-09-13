@@ -114,4 +114,5 @@ Which will result in:
 ## What is missing
 - There is no persistence layer. Every time you send a request - it's being
 sent to Binance (except tests - they use mocks).
-- There's no error handling. You get default error message defined by NestJs framework. 
+- There's no error handling. You get default error message defined by NestJs framework.
+- /fetchMarketData could return data in more user-friendly format.
