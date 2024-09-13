@@ -1,85 +1,117 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Interview Task - Mateusz Głowski
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## How to run
 
 ```bash
-$ npm install
+npm i
+npm run start:dev
 ```
 
-## Compile and run the project
+## About endpoints
+
+This app exposes 3 endpoints:
+
+### /binance/fetchMarketData
+
+Returns basic information about given symbol pair.
+Data format is the same as received from binance API, so it might be not the
+easiest to read, here's description of every field:
+
+- klineOpenTime,
+- openPrice,
+- highPrice,
+- lowPrice,
+- closePrice,
+- volume,
+- klineCloseTime,
+- quoteAssetVolume,
+- numberOfTrades,
+- takerBuyBaseAssetVolume,
+- takerBuyQuoteAssetVolume
+
+example request:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+curl --location --request GET 'localhost:3000/binance/fetchMarketData?symbol=BNBBTC&startTime=1726234711076&endTime=1726234811076'
 ```
 
-## Run tests
+### /binance/aggregateMarketData
+
+Returns average price of given symbol for specified interval (in minutes).
+For example:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl --location --request GET 'localhost:3000/binance/aggregateMarketData?symbol=BNBBTC&startTime=1726180000000&endTime=1726182000000&interval=10'
 ```
 
-## Resources
+will return:
 
-Check out a few resources that may come in handy when working with NestJS:
+```json
+[
+  {
+    "startTime": "2024-09-12T22:27:00.000Z",
+    "endTime": "2024-09-12T22:36:59.999Z",
+    "average": 0.0093125
+  },
+  {
+    "startTime": "2024-09-12T22:37:00.000Z",
+    "endTime": "2024-09-12T22:46:59.999Z",
+    "average": 0.0093156
+  },
+  {
+    "startTime": "2024-09-12T22:47:00.000Z",
+    "endTime": "2024-09-12T22:56:59.999Z",
+    "average": 0.0093236
+  },
+  {
+    "startTime": "2024-09-12T22:57:00.000Z",
+    "endTime": "2024-09-12T23:00:59.999Z",
+    "average": 0.0037293
+  }
+]
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### /binance/priceChange
 
-## Support
+This endpoint builds upon the previous one, so it works identically, except
+it adds one more field to the response which defines if the price wend up or down
+since the previous interval.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+curl --location --request GET 'localhost:3000/binance/priceChange?symbol=BNBBTC&startTime=1726180000000&endTime=1726182000000&interval=10'```
+```
 
-## Stay in touch
+Which will result in:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```json
+[
+  {
+    "startTime": "2024-09-12T22:27:00.000Z",
+    "endTime": "2024-09-12T22:36:59.999Z",
+    "average": 0.0093125
+  },
+  {
+    "startTime": "2024-09-12T22:37:00.000Z",
+    "endTime": "2024-09-12T22:46:59.999Z",
+    "average": 0.0093156,
+    "upOrDown": "UP"
+  },
+  {
+    "startTime": "2024-09-12T22:47:00.000Z",
+    "endTime": "2024-09-12T22:56:59.999Z",
+    "average": 0.0093236,
+    "upOrDown": "UP"
+  },
+  {
+    "startTime": "2024-09-12T22:57:00.000Z",
+    "endTime": "2024-09-12T23:00:59.999Z",
+    "average": 0.0037293,
+    "upOrDown": "DOWN"
+  }
+]
+```
 
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## What is missing
+- There is no persistence layer. Every time you send a request - it's being
+sent to Binance (except tests - they use mocks).
+- There's no error handling. You get default error message defined by NestJs framework. 
