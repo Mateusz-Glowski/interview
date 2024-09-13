@@ -7,6 +7,7 @@ import {
 } from './interfaces/klinesResponse';
 import { map, Observable } from 'rxjs';
 import { chunk, sum } from 'lodash';
+import { AggregatedResponse } from './interfaces/aggregatedResponse';
 
 @Injectable()
 export class BinanceClientService {
@@ -15,7 +16,11 @@ export class BinanceClientService {
   /**
    * Fetch historical market data for a specific cryptocurrency symbol and time range.
    */
-  fetchMarketData(symbol: string, startTime: number, endTime: number) {
+  fetchMarketData(
+    symbol: string,
+    startTime: number,
+    endTime: number,
+  ): Observable<KlinesResponse> {
     // For simplicity purposes for now I'm assuming constant inverval = 1 minute.
     return this.httpService
       .get<KlinesResponse>(
@@ -32,7 +37,7 @@ export class BinanceClientService {
     startTime: number,
     endTime: number,
     chunkSize: number = 10,
-  ): Observable<any> {
+  ): Observable<AggregatedResponse> {
     return this.groupMarketData(symbol, startTime, endTime, chunkSize).pipe(
       map((grouped) => {
         return grouped.map((group) => ({
@@ -64,11 +69,8 @@ export class BinanceClientService {
         for (let i = 0; i < res.length - 1; i++) {
           const prevAgg = res[i];
           const currAgg = res[i + 1];
-          if (i === 0) {
-            res[i].upOrDown = '-';
-          } else {
-            res[i].upOrDown = prevAgg.average > currAgg.average ? 'DOWN' : 'UP';
-          }
+          res[i + 1].upOrDown =
+            prevAgg.average > currAgg.average ? 'DOWN' : 'UP';
         }
         return res;
       }),
@@ -80,7 +82,7 @@ export class BinanceClientService {
     startTime: number,
     endTime: number,
     chunkSize: number = 10,
-  ): Observable<KlinesResponse> {
+  ) {
     return this.fetchMarketData(symbol, startTime, endTime).pipe(
       map((data) => {
         return chunk(data, chunkSize);
